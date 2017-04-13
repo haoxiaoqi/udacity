@@ -1,3 +1,4 @@
+## 1. Load data from csvs
 import unicodecsv
 
 def read_csv(filename):
@@ -13,6 +14,7 @@ print enrollments[0]
 print daily_engagement[0]
 print project_submissions[0]
 
+## 2. Fix data types
 from datetime import datetime as dt
 
 # Takes a date as a string and returns a Python datetime object
@@ -39,6 +41,7 @@ for enrollment in enrollments:
 
 enrollments[0]
 
+# Clean up the data types in the engagement table
 for engagement_record in daily_engagement:
   engagement_record['lessons_completed'] = int(float(engagement_record['lessons_completed']))
   engagement_record['num_courses_visited'] = int(float(engagement_record['num_courses_visited']))
@@ -48,6 +51,7 @@ for engagement_record in daily_engagement:
     
 daily_engagement[0]
 
+# Clean up the data types in the submissions table
 for submission in project_submissions:
   submission['completion_date'] = parse_date(submission['completion_date'])
   submission['creation_date'] = parse_date(submission['creation_date'])
@@ -64,6 +68,9 @@ for engagement_record in daily_engagement:
     engagement_record['account_key']= engagement_record['acct']
     del[engagement_record['acct']]
     
+# Investigate the data
+# Find the total number of rows in each table    
+# Find the # of unique students (account keys) in each table
 def get_unique_students(data):
     unique_students= set()
     for data_point in data:
@@ -81,13 +88,15 @@ unique_project_submitters = get_unique_students(project_submissions)
 len(unique_project_submitters)
 daily_engagement[0]['account_key']
 
+# Find any one student enrollments where the student is missing from the daily engagement table    
 for enrollment in enrollments:
     student = enrollment['account_key']
     if student not in engagement_unique_students:
         print enrollment
         break
         
- num_problem_students = 0
+# Check for more problem records            
+num_problem_students = 0
 
 for enrollment in enrollments:
     student = enrollment['account_key']
@@ -95,22 +104,25 @@ for enrollment in enrollments:
             and enrollment['join_date'] != enrollment['cancel_date']:
         num_problem_students += 1
         print enrollment
-        
+              
 num_problem_students
 
+# Create a set of the account keys for all Udacity test accounts
 udacity_test_accounts = set()
 for enrollment in enrollments:
     if enrollment['is_udacity']:
         udacity_test_accounts.add(enrollment['account_key'])
 len(udacity_test_accounts)
 
+# Given some data with an account_key field, removes any records corresponding to Udacity test accounts
 def remove_udacity_accounts(data):
     non_udacity_data = []
     for data_point in data:
         if data_point['account_key'] not in udacity_test_accounts:
             non_udacity_data.append(data_point)
     return non_udacity_data
-    
+
+# Remove test accounts from all three tables
 non_udacity_enrollments = remove_udacity_accounts(enrollments)
 non_udacity_engagement = remove_udacity_accounts(daily_engagement)
 non_udacity_submissions = remove_udacity_accounts(project_submissions)
@@ -118,4 +130,3 @@ non_udacity_submissions = remove_udacity_accounts(project_submissions)
 print len(non_udacity_enrollments)
 print len(non_udacity_engagement)
 print len(non_udacity_submissions)
-Contact GitHub API Training Shop Blog About
