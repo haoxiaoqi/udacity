@@ -91,7 +91,7 @@ daily_engagement[0]['account_key']
 # Find any one student enrollments where the student is missing from the daily engagement table    
 for enrollment in enrollments:
     student = enrollment['account_key']
-    if student not in engagement_unique_students:
+    if student not in unique_engagement_students:
         print enrollment
         break
         
@@ -100,11 +100,11 @@ num_problem_students = 0
 
 for enrollment in enrollments:
     student = enrollment['account_key']
-    if student not in engagement_unique_students\
+    if student not in unique_engagement_students\
             and enrollment['join_date'] != enrollment['cancel_date']:
         num_problem_students += 1
         print enrollment
-              
+        
 num_problem_students
 
 # Create a set of the account keys for all Udacity test accounts
@@ -137,7 +137,7 @@ print len(non_udacity_submissions)
 paid_students = {}
 
 for enrollment in non_udacity_enrollments:
-    if not enrollment['is_canceled'] or enrollment['days_to_cancel']>7:
+    if (not enrollment['is_canceled'] or enrollment['days_to_cancel']>7):
         account_key = enrollment['account_key']
         enrollment_date = enrollment['join_date']
         paid_students[account_key] = enrollment_date
@@ -154,6 +154,13 @@ def within_one_week(join_date, engagement_date):
     time_delta = engagement_date- join_date
     return time_delta.days < 7
     
+def remove_free_trail_cancels(data):
+    new_data=[]
+    for data_point in data:
+        if data_point['account_key'] in paid_students:
+            new_data.append(data_point)
+    return new_data
+    
 paid_enrollments = remove_free_trail_cancels(non_udacity_enrollments)
 paid_engagement = remove_free_trail_cancels(non_udacity_engagement)
 paid_submissions = remove_free_trail_cancels(non_udacity_submissions)
@@ -162,4 +169,57 @@ print len(paid_enrollments)
 print len(paid_engagement)
 print len(paid_submissions)
 
+#####################################
+#                 7                 #
+#####################################
 
+## Create a list of rows from the engagement table including only rows where
+## the student is one of the paid students you just found, and the date is within
+## one week of the student's join date.
+
+paid_engagement_in_first_week = []
+for engagement_record in paid_engagement:
+    account_key = engagement_record['account_key']
+    join_date = paid_students[account_key]
+    engagement_record_date = engagement_record['utc_date']
+
+    if within_one_week(join_date, engagement_record_date):
+        paid_engagement_in_first_week.append(engagement_record)
+
+len(paid_engagement_in_first_week)
+
+from collections import defaultdict
+
+# Create a dictionary of engagement grouped by student.
+# The keys are account keys, and the values are lists of engagement records.
+engagement_by_account = defaultdict(list)
+for engagement_record in paid_engagement_in_first_week:
+    account_key = engagement_record['account_key']
+    engagement_by_account[account_key].append(engagement_record)
+
+total_minutes_by_account = {}
+
+for account_key,engagement_for_student in engagement_by_account.items():
+    total_minutes = 0
+    for engagement_record in engagement_for_student:
+        total_minutes += engagement_record['total_minutes_visited']
+    total_minutes_by_account[account_key] = total_minutes  
+    
+total_minutes = total_minutes_by_account.values()
+
+import numpy as np
+# Summarize the data about minutes spent in the classroom
+total_minutes = total_minutes_by_account.values()
+print 'Mean:', np.mean(total_minutes)
+print 'Standard deviation:', np.std(total_minutes)
+print 'Minimum:', np.min(total_minutes)
+print 'Maximum:', np.max(total_minutes)
+
+
+
+#####################################
+#                 8                 #
+#####################################
+
+## Go through a similar process as before to see if there is a problem.
+## Locate at least one surprising piece of data, output it, and take a look at it.
