@@ -1,6 +1,6 @@
 ## 1. Load data from csvs
 import unicodecsv
-
+#rb: read only
 def read_csv(filename):
     with open(filename,'rb') as f:
         reader = unicodecsv.DictReader(f)
