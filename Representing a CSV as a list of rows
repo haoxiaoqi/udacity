@@ -1,0 +1,9 @@
+#Option 1: Each row is a list( A list of a list)
+
+csv=[['A1', 'A2', 'A3'],
+     ['B2', 'B2', 'B3']]
+     
+#Option2: Each row is a divtionary
+
+csv = [{'name1' :'A1', 'name2':'A2', 'name3':'A3'},
+       {'name1':'B1', 'name2':'B2', 'name3':'B3'}]
